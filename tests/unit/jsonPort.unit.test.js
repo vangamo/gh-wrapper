@@ -79,7 +79,7 @@ describe('Json CRUD test unit normal cases', () => {
     });
 
   });
-/*
+
   describe('get method', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -195,9 +195,9 @@ describe('Json CRUD test unit normal cases', () => {
       expect(result.length).toBe(0);
     });
   });
-  */
+
 });
-/*
+
 describe('Json CRUD test unit error cases', () => {
   describe('Class constructor', () => {
     beforeEach(() => {
@@ -287,7 +287,7 @@ describe('Json CRUD test unit error cases', () => {
       fs.lstatSync = mockup_lstatSync;
       fs.readFileSync = mockup_readFileSync;
       const instance = new JsonCrud('filename-does-not-matter-in-this-test');
-      const f = () => instance.get( {ID: 1, TAG: 'A'} );
+      const f = () => instance.get( {TAG: 'A'} );
 
       expect(f).toThrow(Error);
       expect(f).toThrow('Multiple results for get conditions');
@@ -325,7 +325,7 @@ describe('Json CRUD test unit error cases', () => {
     });
   });
 });
-
+/*
 describe('Json CRUD test unit exception cases', () => {
   describe('Class constructor', () => {
     beforeEach(() => {

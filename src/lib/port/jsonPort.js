@@ -109,12 +109,23 @@ export default class JsonCrud {
     }
   }
   get(condition) {
-    if (!condition || typeof condition !== 'object') {
+    if (!condition) {
       return null;
     }
-    return this.data.find((it) =>
-      Object.keys(condition).every((key) => it[key] === condition[key])
-    );
+    if (typeof condition !== 'object' || Object.keys(condition).length === 0) {
+      throw new Error('Error in params');
+    }
+
+    const result = this.read(condition);
+    
+    if( result.length === 0 ) {
+      return null;
+    }
+    if( result.length > 1 ) {
+      throw new Error('Multiple results for get conditions');
+    }
+
+    return { ...result.at(0) };
   }
   read(condition) {
     if (!condition || typeof condition !== 'object') {
