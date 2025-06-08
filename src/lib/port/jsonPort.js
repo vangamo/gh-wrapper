@@ -98,7 +98,7 @@ export default class JsonCrud {
 
     this.data = [];
 
-    checkCachePath();
+    checkDataPath();
 
     if (checkFile(this.filename)) {
       // Read file
