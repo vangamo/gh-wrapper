@@ -325,7 +325,7 @@ describe('Json CRUD test unit error cases', () => {
     });
   });
 });
-/*
+
 describe('Json CRUD test unit exception cases', () => {
   describe('Class constructor', () => {
     beforeEach(() => {
@@ -340,7 +340,7 @@ describe('Json CRUD test unit exception cases', () => {
     // Read non array
   });
 });
-*/
+
 /*
 jest.mock('node:fs');
 

@@ -82,7 +82,7 @@ export default class JsonCrud {
   constructor(fileOrSettings) {
     if (typeof fileOrSettings !== 'object') {
       this.filename = fileOrSettings;
-    } else {
+    } else if( fileOrSettings !== null ) {  // null is an object
       this.filename = fileOrSettings.filename;
     }
 
