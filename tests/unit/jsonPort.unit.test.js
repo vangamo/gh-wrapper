@@ -1,5 +1,188 @@
+import { jest } from '@jest/globals'; // <https://jestjs.io/docs/ecmascript-modules>
 import fs from 'node:fs';
-import JsonCrud from '../../src/lib/port/jsonPort';
+import JsonCrud, { _private_ } from '../../src/lib/port/jsonPort';
+
+jest.mock('node:fs', () => jest.fn());
+
+describe('Json CRUD test unit normal cases', () => {
+  describe('Private methods', () => {
+    it('library has private methods', async () => {
+      expect(typeof _private_).toBe('object');
+    });
+  });
+
+  describe('Class constructor', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('creates an instance when the parameter is a string with path and .json extension', () => {
+      const instance = new JsonCrud('.data/.cache/test.json');
+      expect(typeof instance).toBe('object');
+      expect(instance instanceof JsonCrud).toBe(true);
+      expect(instance.filename).toBe('.data/.cache/test.json');
+    });
+
+    it('creates an instance when the parameter is an object with path and .json extension', () => {
+      const instance = new JsonCrud({filename: '.data/.cache/test.json'});
+      expect(typeof instance).toBe('object');
+      expect(instance instanceof JsonCrud).toBe(true);
+      expect(instance.filename).toBe('.data/.cache/test.json');
+    });
+/*
+    it('creates an instance when the parameter is a string with path but without .json extension', () => {
+      fs.mkdirSync = jest.fn(() => {});
+      fs.writeFileSync = jest.fn(() => {});
+      const instance = new JsonCrud('.data/.cache/test');
+      expect(instance.filename).toBe('.data/.cache/test.json');
+    });
+
+    it('creates an instance when the parameter is a string with .json extension but without path', () => {
+      fs.mkdirSync = jest.fn(() => {});
+      fs.writeFileSync = jest.fn(() => {});
+      const instance = new JsonCrud('test.json');
+      expect(instance.filename).toBe('.data/.cache/test.json');
+    });
+
+    it('creates the file when filename does not exist', () => {
+      fs.accessSync = jest.fn(() => {
+        throw new Error('File does not exist');
+      });
+      fs.mkdirSync = jest.fn(() => {});
+      fs.writeFileSync = jest.fn(() => {});
+      new JsonCrud('filename-does-not-matter-in-this-test');
+      expect(fs.writeFileSync).toHaveBeenCalled();
+    });
+*/
+    it('reads the file when filename exists', () => {
+      fs.lstatSync = jest.fn(() => ({
+        isDirectory: () => true,
+        isFile: () => true,
+      }));
+      fs.readFileSync = jest.fn(() => '[]');
+      new JsonCrud('filename-does-not-matter-in-this-test');
+      expect(fs.readFileSync).toHaveBeenCalled();
+    });
+
+  });
+
+  describe('get method', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    const mockup_lstatSync = jest.fn(() => ({
+        isDirectory: () => true,
+        isFile: () => true,
+      }));
+    const mockup_readFileSync = jest.fn(() => '[{"ID":1,"NAME":"TEST-OBJECT-1","TAG":"A"},{"ID":2,"NAME":"TEST-OBJECT-2","TAG":"A"},{"ID":3,"NAME":"TEST-OBJECT-3","TAG":"B"}]');
+    const mockupNoData_readFileSync = jest.fn(() => '[]');
+
+    it('returns null when parameter is null', () => {
+      fs.lstatSync = mockup_lstatSync;
+      fs.readFileSync = mockup_readFileSync;
+
+      const instance = new JsonCrud('filename-does-not-matter-in-this-test');
+      const result = instance.get(null);
+      expect(result).toBe(null);
+    });
+    
+    it('returns an object when parameter has one property', () => {
+      fs.lstatSync = mockup_lstatSync;
+      fs.readFileSync = mockup_readFileSync;
+
+      const instance = new JsonCrud('filename-does-not-matter-in-this-test');
+      const result = instance.get({ID: 1});
+      expect(typeof result).toBe('object');
+      expect(result).toEqual({ID: 1, NAME: 'TEST-OBJECT-1', TAG: 'A'});
+    });
+
+    it('returns an object when parameter has multiple properties', () => {
+      fs.lstatSync = mockup_lstatSync;
+      fs.readFileSync = mockup_readFileSync;
+
+      const instance = new JsonCrud('filename-does-not-matter-in-this-test');
+      const result = instance.get({ID: 1, TAG: 'A'});
+      expect(typeof result).toBe('object');
+      expect(result).toEqual({ID: 1, NAME: 'TEST-OBJECT-1', TAG: 'A'});
+    });
+
+    it('returns null when parameter has one property but no data', () => {
+      fs.lstatSync = mockup_lstatSync;
+      fs.readFileSync = mockupNoData_readFileSync;
+
+      const instance = new JsonCrud('filename-does-not-matter-in-this-test');
+      const result = instance.get({ID: 1});
+      expect(result).toBe(null);
+    });
+
+    it('returns null when parameter has one property but does not exist', () => {
+      fs.lstatSync = mockup_lstatSync;
+      fs.readFileSync = mockup_readFileSync;
+
+      const instance = new JsonCrud('filename-does-not-matter-in-this-test');
+      const result = instance.get({ID: 42});
+      expect(result).toBe(null);
+    });
+  });
+
+  describe('read method', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    const mockup_lstatSync = jest.fn(() => ({
+        isDirectory: () => true,
+        isFile: () => true,
+      }));
+    const mockup_readFileSync = jest.fn(() => '[{"ID":1,"NAME":"TEST-OBJECT-1","TAG":"A"},{"ID":2,"NAME":"TEST-OBJECT-2","TAG":"A"},{"ID":3,"NAME":"TEST-OBJECT-3","TAG":"B"}]');
+
+    it('returns complete array when no parameter', () => {
+      fs.lstatSync = mockup_lstatSync;
+      fs.readFileSync = mockup_readFileSync;
+
+      const instance = new JsonCrud('filename-does-not-matter-in-this-test');
+      const result = instance.read();
+      expect(Array.isArray(result)).toBe(true);
+      expect(result.length).toBe(3);
+    });
+
+    it('returns filtered array when parameter has one property', () => {
+      fs.lstatSync = mockup_lstatSync;
+      fs.readFileSync = mockup_readFileSync;
+
+      const instance = new JsonCrud('filename-does-not-matter-in-this-test');
+      const result1 = instance.read({ID: 1});
+      expect(Array.isArray(result1)).toBe(true);
+      expect(result1.length).toBe(1);
+
+      const result2 = instance.read({TAG: 'A'});
+      expect(Array.isArray(result2)).toBe(true);
+      expect(result2.length).toBe(2);
+    });
+
+    it('returns filtered array when parameter has multiple properties', () => {
+      fs.lstatSync = mockup_lstatSync;
+      fs.readFileSync = mockup_readFileSync;
+
+      const instance = new JsonCrud('filename-does-not-matter-in-this-test');
+      const result = instance.read({ID: 1, TAG: 'A'});
+      expect(Array.isArray(result)).toBe(true);
+      expect(result.length).toBe(1);
+    });
+
+    it('returns an empty array when parameter has one property but no data match', () => {
+      fs.lstatSync = mockup_lstatSync;
+      fs.readFileSync = mockup_readFileSync;
+
+      const instance = new JsonCrud('filename-does-not-matter-in-this-test');
+      const result = instance.read({ID: 42});
+      expect(Array.isArray(result)).toBe(true);
+      expect(result.length).toBe(0);
+    });
+  });
+});
+
 
 
 /*

@@ -129,15 +129,13 @@ export default class JsonCrud {
   }
 }
 
-export const exp = {};
+export const _private_ = {};
 
 if (process.env.NODE_ENV === 'test') {
-  exp._private_ = {
-    checkDataPath,
-    checkCachePath,
-    checkDir,
-    checkFile,
-    writeFile,
-    readFile,
-  };
+  _private_.checkDataPath = checkDataPath;
+  _private_.checkCachePath = checkCachePath;
+  _private_.checkDir = checkDir;
+  _private_.checkFile = checkFile;
+  _private_.writeFile = writeFile;
+  _private_.readFile = readFile;
 }
