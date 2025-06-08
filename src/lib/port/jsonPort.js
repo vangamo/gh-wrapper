@@ -1,4 +1,7 @@
 import fs from 'node:fs';
+import path from 'node:path';
+
+const DEFAULT_DIRECTORY = path.join(process.cwd(), '.data');
 
 function checkDataPath() {
   try {
@@ -87,7 +90,10 @@ export default class JsonCrud {
       throw new Error('Filename not specified');
     }
     if (!this.filename.endsWith('.json')) {
-      this.filename = './.data/.cache/' + this.filename + '.json';
+      this.filename = this.filename + '.json';
+    }
+    if (!this.filename.includes('/')) {
+      this.filename = path.join(DEFAULT_DIRECTORY, this.filename);
     }
 
     this.data = [];

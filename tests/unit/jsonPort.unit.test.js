@@ -1,7 +1,10 @@
 import { jest } from '@jest/globals'; // <https://jestjs.io/docs/ecmascript-modules>
 import fs from 'node:fs';
+import path from 'node:path';
 import JsonCrud, { _private_ } from '../../src/lib/port/jsonPort';
 
+const DEFAULT_DIRECTORY = path.join(process.cwd(), '.data');
+const TEST_FILENAME = 'test.json';
 jest.mock('node:fs', () => jest.fn());
 
 describe('Json CRUD test unit normal cases', () => {
@@ -17,31 +20,31 @@ describe('Json CRUD test unit normal cases', () => {
     });
 
     it('creates an instance when the parameter is a string with path and .json extension', () => {
-      const instance = new JsonCrud('.data/.cache/test.json');
+      const instance = new JsonCrud(path.join(DEFAULT_DIRECTORY, TEST_FILENAME));
       expect(typeof instance).toBe('object');
       expect(instance instanceof JsonCrud).toBe(true);
-      expect(instance.filename).toBe('.data/.cache/test.json');
+      expect(instance.filename).toBe(path.join(DEFAULT_DIRECTORY, TEST_FILENAME));
     });
 
     it('creates an instance when the parameter is an object with path and .json extension', () => {
-      const instance = new JsonCrud({filename: '.data/.cache/test.json'});
+      const instance = new JsonCrud({filename: path.join(DEFAULT_DIRECTORY, TEST_FILENAME)});
       expect(typeof instance).toBe('object');
       expect(instance instanceof JsonCrud).toBe(true);
-      expect(instance.filename).toBe('.data/.cache/test.json');
+      expect(instance.filename).toBe(path.join(DEFAULT_DIRECTORY, TEST_FILENAME));
     });
-/*
+
     it('creates an instance when the parameter is a string with path but without .json extension', () => {
       fs.mkdirSync = jest.fn(() => {});
       fs.writeFileSync = jest.fn(() => {});
-      const instance = new JsonCrud('.data/.cache/test');
-      expect(instance.filename).toBe('.data/.cache/test.json');
+      const instance = new JsonCrud(path.join(DEFAULT_DIRECTORY, 'test'));
+      expect(instance.filename).toBe(path.join(DEFAULT_DIRECTORY, TEST_FILENAME));
     });
 
     it('creates an instance when the parameter is a string with .json extension but without path', () => {
       fs.mkdirSync = jest.fn(() => {});
       fs.writeFileSync = jest.fn(() => {});
-      const instance = new JsonCrud('test.json');
-      expect(instance.filename).toBe('.data/.cache/test.json');
+      const instance = new JsonCrud(TEST_FILENAME);
+      expect(instance.filename).toBe(path.join(DEFAULT_DIRECTORY, TEST_FILENAME));
     });
 
     it('creates the file when filename does not exist', () => {
@@ -53,7 +56,7 @@ describe('Json CRUD test unit normal cases', () => {
       new JsonCrud('filename-does-not-matter-in-this-test');
       expect(fs.writeFileSync).toHaveBeenCalled();
     });
-*/
+
     it('reads the file when filename exists', () => {
       fs.lstatSync = jest.fn(() => ({
         isDirectory: () => true,
