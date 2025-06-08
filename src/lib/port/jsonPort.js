@@ -58,8 +58,9 @@ export default class JsonCrud {
     );
   }
 
-  create() {
-    throw Error('Not implemented');
+  create(item) {
+    this.data.push(item);
+    this._writeFile();
   }
 
   update() {
@@ -79,7 +80,7 @@ export default class JsonCrud {
   _readFile() {
     const rawContents = this.file.read();
     const contents = this._unserialize(rawContents);
-    console.info(`JSON-CRUD. Reading ${this.data.length} items`);
+    console.info(`JSON-CRUD. Reading ${contents.length} items`);
     return contents;
   }
 

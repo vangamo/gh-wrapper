@@ -64,13 +64,13 @@ export default class FileCrud {
       return false;
     }
     try {
-      fs.accessSync(this.filename);
+      fs.accessSync(path.join(this.path, this.filename));      
     } catch (err) {
       return false;
     }
 
-    const stats = fs.lstatSync(this.filename);
-
+    const stats = fs.lstatSync(path.join(this.path, this.filename));
+    
     if (!stats.isFile()) {
       console.error(`FILE-CRUD. ERROR ${this.filename} is not a real file.`);
     }
