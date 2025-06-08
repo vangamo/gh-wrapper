@@ -183,6 +183,134 @@ describe('Json CRUD test unit normal cases', () => {
   });
 });
 
+describe('Json CRUD test unit error cases', () => {
+  describe('Class constructor', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('validates null parameter', () => {
+      const f = () => new JsonCrud(null);
+
+      expect(f).toThrow(Error);
+      expect(f).toThrow('Filename not specified');
+    });
+
+    it('validates empty parameter', () => {
+      const f = () => { new JsonCrud() };
+
+      expect(f).toThrow(Error);
+      expect(f).toThrow('Filename not specified');
+    });
+
+    it('validates parameter is a number', () => {
+      const f = () => { new JsonCrud(42) };
+
+      expect(f).toThrow(Error);
+      expect(f).toThrow('Filename not specified');
+    });
+
+    it('validates parameter is an array', () => {
+      const f = () => { new JsonCrud( [] ) };
+
+      expect(f).toThrow(Error);
+      expect(f).toThrow('Filename not specified');
+    });
+
+    it('validates parameter is an empty string', () => {
+      const f = () => { new JsonCrud('') };
+
+      expect(f).toThrow(Error);
+      expect(f).toThrow('Filename not specified');
+    });
+
+    it('validates object parameter without filename property', () => {
+      const f = () => { new JsonCrud( {otherParam: ''} ) };
+
+      expect(f).toThrow(Error);
+      expect(f).toThrow('Filename not specified');
+    });
+    it('validates object parameter with an empty filename property', () => {
+      const f = () => { new JsonCrud( {filename: ''} ) };
+
+      expect(f).toThrow(Error);
+      expect(f).toThrow('Filename not specified');
+    });
+  });
+
+  describe('get method', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+    const mockup_lstatSync = jest.fn(() => ({
+        isDirectory: () => true,
+        isFile: () => true,
+      }));
+    const mockup_readFileSync = jest.fn(() => '[{"ID":1,"NAME":"TEST-OBJECT-1","TAG":"A"},{"ID":2,"NAME":"TEST-OBJECT-2","TAG":"A"},{"ID":3,"NAME":"TEST-OBJECT-3","TAG":"B"}]');
+
+    it('validates number parameter', () => {
+      fs.lstatSync = mockup_lstatSync;
+      fs.readFileSync = mockup_readFileSync;
+      const instance = new JsonCrud('filename-does-not-matter-in-this-test');
+      const f = () => instance.get(42);
+
+      expect(f).toThrow(Error);
+      expect(f).toThrow('Error in params');
+    });
+
+    it('validates empty object parameter', () => {
+      fs.lstatSync = mockup_lstatSync;
+      fs.readFileSync = mockup_readFileSync;
+      const instance = new JsonCrud('filename-does-not-matter-in-this-test');
+      const f = () => instance.get({});
+
+      expect(f).toThrow(Error);
+      expect(f).toThrow('Error in params');
+    });
+
+    it('validates condition with more than one result', () => {
+      fs.lstatSync = mockup_lstatSync;
+      fs.readFileSync = mockup_readFileSync;
+      const instance = new JsonCrud('filename-does-not-matter-in-this-test');
+      const f = () => instance.get( {ID: 1, TAG: 'A'} );
+
+      expect(f).toThrow(Error);
+      expect(f).toThrow('Multiple results for get conditions');
+    });
+  });
+
+  describe('read method', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+    const mockup_lstatSync = jest.fn(() => ({
+        isDirectory: () => true,
+        isFile: () => true,
+      }));
+    const mockup_readFileSync = jest.fn(() => '[{"ID":1,"NAME":"TEST-OBJECT-1","TAG":"A"},{"ID":2,"NAME":"TEST-OBJECT-2","TAG":"A"},{"ID":3,"NAME":"TEST-OBJECT-3","TAG":"B"}]');
+
+    it('returns complete array with numeric parameter', () => {
+      fs.lstatSync = mockup_lstatSync;
+      fs.readFileSync = mockup_readFileSync;
+      const instance = new JsonCrud('filename-does-not-matter-in-this-test');
+      const result = instance.read(42);
+
+      expect(Array.isArray(result)).toBe( true );
+      expect(result.length).toBe(3);
+    });
+
+    it('returns complete array with empty object parameter', () => {
+      fs.lstatSync = mockup_lstatSync;
+      fs.readFileSync = mockup_readFileSync;
+      const instance = new JsonCrud('filename-does-not-matter-in-this-test');
+      const result = instance.read({});
+
+      expect(Array.isArray(result)).toBe( true );
+      expect(result.length).toBe(3);
+    });
+  });
+});
+
 
 
 /*
