@@ -1,12 +1,7 @@
 import JsonCrud from './lib/port/jsonPort.js';
+import FileCrud from './lib/port/filePort.js';
 
-const a = new JsonCrud('me');
-
-console.log( a );
-
-console.log( a.get() );
-console.log( a.read() );
-
-console.log( a.get({id:1}) );
-console.log( a.read({id:1}) );
-console.log( a.read({me: "value"}) );
+export {
+  JsonCrud,
+  FileCrud
+};

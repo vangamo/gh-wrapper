@@ -1,5 +1,5 @@
 {
-  "name": "site-care",
+  "name": "gh-wrapper",
   "version": "0.1.1",
   "description": "",
   "license": "MIT",
@@ -7,8 +7,6 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "node --watch src/index.js",
     "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
     "test:watch": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --watch --coverage"
   },
