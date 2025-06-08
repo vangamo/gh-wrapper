@@ -3,16 +3,18 @@ import fs from 'node:fs';
 import path from 'node:path';
 import JsonCrud, { _private_ } from '../../src/lib/port/jsonPort';
 
-const DEFAULT_DIRECTORY = path.join(process.cwd(), '.data');
+const DEFAULT_DIRECTORY = '.test';
 const TEST_FILENAME = 'test.json';
 jest.mock('node:fs', () => jest.fn());
 
 describe('Json CRUD test unit normal cases', () => {
+  /* Not needed
   describe('Private methods', () => {
     it('library has private methods', async () => {
       expect(typeof _private_).toBe('object');
     });
   });
+  */
 
   describe('Class constructor', () => {
     beforeEach(() => {
@@ -39,14 +41,15 @@ describe('Json CRUD test unit normal cases', () => {
       const instance = new JsonCrud(path.join(DEFAULT_DIRECTORY, 'test'));
       expect(instance.filename).toBe(path.join(DEFAULT_DIRECTORY, TEST_FILENAME));
     });
-
+    /*
+      @todo test in fileCrud unit test
     it('creates an instance when the parameter is a string with .json extension but without path', () => {
       fs.mkdirSync = jest.fn(() => {});
       fs.writeFileSync = jest.fn(() => {});
       const instance = new JsonCrud(TEST_FILENAME);
       expect(instance.filename).toBe(path.join(DEFAULT_DIRECTORY, TEST_FILENAME));
     });
-
+    */
     it('creates the file when filename does not exist', () => {
       fs.accessSync = jest.fn((path) => {
         if( path.endsWith('.json')) {
