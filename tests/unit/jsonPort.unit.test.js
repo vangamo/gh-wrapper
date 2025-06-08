@@ -311,7 +311,20 @@ describe('Json CRUD test unit error cases', () => {
   });
 });
 
+describe('Json CRUD test unit exception cases', () => {
+  describe('Class constructor', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
 
+    it('throws an exception when file path is not a directory', () => {});
+    it('throws an exception when filename is not a file', () => {});
+    it('throws an exception when filename is not a readable file', () => {});
+    it('throws an exception when fs throws an exception', () => {});
+    // Read malformed json
+    // Read non array
+  });
+});
 
 /*
 jest.mock('node:fs');
