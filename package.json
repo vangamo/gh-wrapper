@@ -4,6 +4,10 @@
   "description": "",
   "license": "MIT",
   "author": "vanGamo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vangamo/gh-wrapper.git"
+  },
   "type": "module",
   "main": "src/index.js",
   "scripts": {
