@@ -64,9 +64,9 @@ export default class JsonCrud {
   }
 
   update(condition, item) {
-    const item = this.get(condition);
+    const itemFound = this.get(condition);
 
-    if( item === null ) {
+    if( itemFound === null ) {
       throw new Error('Item does not exist');
     }
 
@@ -79,9 +79,9 @@ export default class JsonCrud {
   }
 
   del(condition) {
-    const item = this.get(condition);
+    const itemFound = this.get(condition);
 
-    if( item === null ) {
+    if( itemFound === null ) {
       throw new Error('Item does not exist');
     }
 
