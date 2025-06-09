@@ -63,12 +63,34 @@ export default class JsonCrud {
     this._writeFile();
   }
 
-  update() {
-    throw Error('Not implemented');
+  update(condition, item) {
+    const item = this.get(condition);
+
+    if( item === null ) {
+      throw new Error('Item does not exist');
+    }
+
+    const position = this.data.findIndex((it) =>
+      Object.keys(condition).every((key) => it[key] === condition[key])
+    )
+    
+    this.data.splice(position, 1, {...item});
+    this._writeFile();
   }
 
-  del() {
-    throw Error('Not implemented');
+  del(condition) {
+    const item = this.get(condition);
+
+    if( item === null ) {
+      throw new Error('Item does not exist');
+    }
+
+    const position = this.data.findIndex((it) =>
+      Object.keys(condition).every((key) => it[key] === condition[key])
+    )
+    
+    this.data.splice(position, 1);
+    this._writeFile();
   }
 
   _writeFile() {
