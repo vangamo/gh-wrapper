@@ -119,12 +119,14 @@ export default class TsvCrud {
   _unserialize(rawContents) {
     const rawContentsArray = rawContents.split('\n');
     const contents = [];
-    const headers = rawContentsArray.shift().split('\t');
+    const headers = rawContentsArray.shift().split('\t').map(fieldName => fieldName.trim());
     rawContentsArray.forEach((line) => {
       const lineValues = line.split('\t');
       const lineDataObj = {};
       headers.forEach((fieldName, idx) => {
-        lineDataObj[fieldName] = lineValues[idx];
+        if(fieldName !== '') {
+          lineDataObj[fieldName] = lineValues[idx].trim();
+        }
       });
       contents.push(lineDataObj);
     });
