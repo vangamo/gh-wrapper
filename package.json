@@ -16,5 +16,8 @@
   },
   "devDependencies": {
     "jest": "^29.7.0"
+  },
+  "dependencies": {
+    "@octokit/rest": "^22.0.0"
   }
 }
