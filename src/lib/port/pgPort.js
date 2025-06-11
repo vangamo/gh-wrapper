@@ -4,7 +4,6 @@ import { Client, Pool } from 'pg';
 
 export default class PgCrud {
   static __pool__ = null;
-  static __conn__ = null;
 
   constructor(settings) {
     if (typeof settings !== 'object') {
@@ -19,37 +18,21 @@ export default class PgCrud {
   }
 
   async getConn() {
-    if (!PgCrud.__conn__) {
-      if (this.connectionString.includes('localhost')) {
-        PgCrud.__conn__ = new Client({
-          connectionString: this.connectionString,
-        });
-        await PgCrud.__conn__.connect();
-        PgCrud.__conn__.close = async () => {
-          await PgCrud.__conn__.end();
-          PgCrud.__conn__ = null;
-        };
-      } else {
-        if (!PgCrud.__pool__) {
-          PgCrud.__pool__ = new Pool({
-            connectionString: this.connectionString,
-          });
-        }
-        PgCrud.__conn__ = await PgCrud.__pool__.connect();
-        PgCrud.__conn__.close = async () => {
-          await PgCrud.__conn__.release();
-          PgCrud.__conn__ = null;
-        };
-      }
-
-      const versionRS = await PgCrud.__conn__.query('SELECT version()');
+    if (!PgCrud.__pool__) {
+      PgCrud.__pool__ = new Pool({
+        connectionString: this.connectionString,
+      });
+      const conn = await PgCrud.__pool__.connect();
+      const versionRS = await conn.query('SELECT version()');
 
       if (versionRS && versionRS.length > 0) {
         console.log(versionRS.at(0).version);
       }
+      await conn.release();
     }
 
-    return PgCrud.__conn__;
+    const conn = await PgCrud.__pool__.connect();
+    return conn;
   }
 
   async get(condition) {
@@ -82,7 +65,7 @@ export default class PgCrud {
         [value]
       );
     }
-    await db.close();
+    await db.release();
 
     return resultSet.rows.length === 1 ? resultSet.rows : null;
   }
@@ -95,7 +78,7 @@ export default class PgCrud {
     } else {
       const queryParams = Object.entries(condition).reduce(
         (queryParams, [field, value], idx) => ({
-          conditions: [...queryParams.conditions, `${field} = $${1 + idx}`],
+          conditions: [...queryParams.conditions, `"${field}" = $${1 + idx}`],
           values: [...queryParams.values, value],
         }),
         { conditions: [], values: [] }
@@ -109,7 +92,7 @@ export default class PgCrud {
       );
     }
 
-    await db.close();
+    await db.release();
 
     return resultSet.rows;
   }
@@ -123,7 +106,7 @@ export default class PgCrud {
 
     const queryParams = Object.entries(item).reduce(
       (queryParams, [field, value], idx) => ({
-        fields: [...queryParams.fields, field],
+        fields: [...queryParams.fields, `"${field}"`],
         params: [...queryParams.params, `$${1 + idx}`],
         values: [...queryParams.values, value],
       }),
@@ -135,7 +118,7 @@ export default class PgCrud {
     )}) VALUES (${queryParams.params.join(', ')}) RETURNING *`;
     const resultSet = await db.query(insertStmt, queryParams.values);
 
-    await db.close();
+    await db.release();
     if (resultSet.rowCount === 1) {
       return resultSet.rows.at(0);
     } else {
@@ -183,16 +166,22 @@ export default class PgCrud {
       throw new Error('Error with params');
     }
 
-    const updateParams = Object.entries(item).reduce(
-      (updateParams, [field, value], idx) =>
-        field === fieldCond
-          ? updateParams
-          : {
-              fields: [...updateParams.fields, `${field} = $${1 + idx}`],
-              values: [...updateParams.values, value],
-            },
-      { fields: [], params: [], values: [] }
-    );
+    if (item.created_at) {
+      delete item.created_at;
+    }
+    if (item.created_by) {
+      delete item.created_by;
+    }
+
+    const updateParams = Object.entries(item)
+      .filter(([field, value]) => field !== fieldCond)
+      .reduce(
+        (updateParams, [field, value], idx) => ({
+          fields: [...updateParams.fields, `"${field}" = $${1 + idx}`],
+          values: [...updateParams.values, value],
+        }),
+        { fields: [], values: [] }
+      );
 
     const updateStmt = `
       UPDATE ${this.domain}
@@ -205,7 +194,7 @@ export default class PgCrud {
       valueCond,
     ]);
 
-    await db.close();
+    await db.release();
     if (resultSet.rowCount === 1) {
       return resultSet.rows.at(0);
     } else {
@@ -232,7 +221,7 @@ export default class PgCrud {
     const deleteStmt = `DELETE FROM ${this.domain} WHERE id=$1 RETURNING *`;
     const resultSet = await db.query(deleteStmt, [condition]);
 
-    await db.close();
+    await db.release();
 
     if (resultSet.rowCount === 1) {
       return resultSet.rows.at(0);
