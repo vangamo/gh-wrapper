@@ -1,32 +1,28 @@
-import FileCrud from './filePort.js';
+//import FileCrud from './filePort.js';
 
 export default class TsvCrud {
-  constructor(fileOrSettings) {
-    if (typeof fileOrSettings !== 'object') {
-      this.filename = fileOrSettings;
-    } else if (fileOrSettings !== null) {
-      // null is an object
-      this.filename = fileOrSettings.filename;
-
-      if (
-        fileOrSettings.content &&
-        typeof fileOrSettings.content === 'string'
-      ) {
-        this.data = this._unserialize(fileOrSettings.content);
+  constructor(settings) {
+    if (typeof settings !== 'object') {
+      this.data = [];
+    } else {
+      if (settings.content) {
+        if (typeof settings.content === 'string') {
+          this.data = this._unserialize(settings.content);
+        }
+        if (typeof settings.content === 'object') {
+          this.data = settings.content;
+        }
       } else {
         this.data = [];
       }
-    }
 
-    if (this.filename) {
-      if (typeof this.filename !== 'string') {
-        throw new Error('Bad filename');
+      if (
+        settings.file &&
+        typeof settings.file === 'object' &&
+        settings.file instanceof FileCrud
+      ) {
+        this.file = settings.file;
       }
-      if (!this.filename.endsWith('.tsv')) {
-        this.filename = this.filename + '.tsv';
-      }
-
-      this.file = new FileCrud({ filename: this.filename });
     }
 
     if (this.file && !this.file.checkExistsFile()) {
@@ -84,16 +80,20 @@ export default class TsvCrud {
   }
 
   _writeFile() {
-    console.info(`TSV-CRUD. Writting ${this.data.length} items`);
-    const rawContents = this._serialize(this.data);
-    this.file.update(rawContents);
+    if (this.file) {
+      console.info(`TSV-CRUD. Writting ${this.data.length} items`);
+      const rawContents = this._serialize(this.data);
+      this.file.update(rawContents);
+    }
   }
 
   _readFile() {
-    const rawContents = this.file.read();
-    const contents = this._unserialize(rawContents);
-    console.info(`TSV-CRUD. Reading ${contents.length} items`);
-    return contents;
+    if (this.file) {
+      const rawContents = this.file.read();
+      const contents = this._unserialize(rawContents);
+      console.info(`TSV-CRUD. Reading ${contents.length} items`);
+      return contents;
+    }
   }
 
   _serialize(contents) {
@@ -119,12 +119,15 @@ export default class TsvCrud {
   _unserialize(rawContents) {
     const rawContentsArray = rawContents.split('\n');
     const contents = [];
-    const headers = rawContentsArray.shift().split('\t').map(fieldName => fieldName.trim());
+    const headers = rawContentsArray
+      .shift()
+      .split('\t')
+      .map((fieldName) => fieldName.trim());
     rawContentsArray.forEach((line) => {
       const lineValues = line.split('\t');
       const lineDataObj = {};
       headers.forEach((fieldName, idx) => {
-        if(fieldName !== '') {
+        if (fieldName !== '' && lineValues[idx]) {
           lineDataObj[fieldName] = lineValues[idx].trim();
         }
       });
